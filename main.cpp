@@ -231,26 +231,27 @@ void projectDistanceTo3D()
             screen[i][j] = brightness[int((1 - ((float)rays_distance[j] / (14.0))) * (float)number_of_characters)];
             screen_brightness[i][j] = int((1 - ((float)rays_distance[j] / (14.0))) * 255.0);
         }
-
+        /*
         for (int i = top_free_space + bar_height; i < screen_height; i++)
         {
 
-            // cout << i << " ";
-            // screen[i][j] = *".";
-            // if (i > screen_height * 0.5)
-            //{
-            //     screen[i][j] = *":";
-            // }
-            // if (i > screen_height * 0.75)
-            //{
-            //     screen[i][j] = *"-";
-            // }
-            // else
-            //{
+             cout << i << " ";
+             screen[i][j] = *".";
+             if (i > screen_height * 0.5)
+            {
+                 screen[i][j] = *":";
+             }
+             if (i > screen_height * 0.75)
+            {
+                 screen[i][j] = *"-";
+             }
+             else
+            {
 
-            // screen[i][j] = *i.str();
-            // }
+             screen[i][j] = *i.str();
+             }
         }
+        */
     }
 
     // Add Minimap to the screen
@@ -283,8 +284,6 @@ void drawScreen()
     {
         for (int i = 0; i < number_of_rays; i++)
         {
-
-
             // Set the brightness level (0 to 255)
             int brightnessLevel = screen_brightness[j][i];
 
@@ -347,15 +346,16 @@ void getKeyPress()
 int main()
 {
     std::ios::sync_with_stdio(false);
-    // Your existing main loop
+    cout << setprecision(9);
+    // Main loop
     while (true)
     {
         getKeyPress();
         rayCast();
         projectDistanceTo3D();
         drawScreen();
-        //drawPlayerOnMap();
-        cout << setprecision(9) << posx << " " << posy << " " << theta << endl;
+        //drawPlayerOnMap(); // Show a minimap after the screen is drawn
+        cout << posx << " " << posy << " " << theta << endl;
     }
 
     return 0;
