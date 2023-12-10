@@ -6,6 +6,8 @@
 
 using namespace std;
 
+#define DEBUG_MODE 0 // Set to 1 if you want to enable onscreen minimap. (This is only applicable if you have a bigger screen resolution and dont mind the minimap taking up screen space)
+
 const int MAP_SIZE = 16;
 
 // Theta is cw, 0 is on +x (straight to the right)
@@ -44,14 +46,22 @@ const float ray_step_size = 0.1;
 
 const float fov = (3.14159f * 0.75) / 4.0f;
 
-const int number_of_rays = 80; // Screen width
-const int screen_height = 24;   // Screen height
+// Screen width
+const int number_of_rays = 80;
 
+// Screen height
+const int screen_height = 24;
+
+// Screen drawing buffer
 char screen[screen_height][number_of_rays];
+
+// Screen brightness buffer, used for esquape sequences
 uint8_t screen_brightness[screen_height][number_of_rays];
 
+// Distance for each ray in fov
 float rays_distance[number_of_rays];
 
+// Array of characters in the order of brightness
 const char brightness[] = ".:--+*#%@"; //" .\'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 const int number_of_characters = sizeof(brightness);
 
@@ -172,7 +182,7 @@ void projectDistanceTo3D() {
     }
 
     // Add Minimap to the screen
-    if (0) {
+    if (DEBUG_MODE) { // Set at 0. This is for debugging only
         for (int i = number_of_rays - MAP_SIZE; i < number_of_rays; i++) {
             for (int j = 0; j < MAP_SIZE; j++) {
                 if (map[j][i - number_of_rays] == 0) {
@@ -203,8 +213,6 @@ void drawScreen() {
 
             // Output a character with adjusted brightness (using true color escape sequence)
             std::cout << "\x1b[38;2;" << brightnessLevel << ";" << brightnessLevel << ";" << brightnessLevel << "m" << screen[j][i] << "\x1b[0m";
-
-            //cout << screen[j][i];
         }
         cout << "\n";
     }
@@ -214,15 +222,17 @@ void stepPlayerLocation(bool dir) {
     float posx_temp = posx;
     float posy_temp = posy;
 
-    if (dir == 1) {
+    if (dir == 1) { // Going forward
         // Calculate the new position based on the bearing (theta) and step size
         posx += (float)step_size * cos(theta);
         posy += (float)step_size * sin(theta);
-    } else {
+    } else { // Going backwards
         // Calculate the new position based on the bearing (theta) and step size
         posx -= (float)step_size * cos(theta);
         posy -= (float)step_size * sin(theta);
     }
+
+    // Check if the new position is a valid position to move to, apply the move only if no obstacles are detected
     if (map[int(posy)][int(posx)] == 1) {
         posx = posx_temp;
         posy = posy_temp;
@@ -230,7 +240,6 @@ void stepPlayerLocation(bool dir) {
 }
 
 void getKeyPress() {
-
     if (GetAsyncKeyState('W') & 0x8000) // 'W' key is pressed
     {
         stepPlayerLocation(1);
@@ -248,21 +257,23 @@ void getKeyPress() {
         theta -= theta_step_size;
     }
 
-    // You may want to introduce a small delay here to avoid rapid key detection
+    // Small delay here to avoid rapid key detection
     Sleep(100);
 }
 
 int main() {
     std::ios::sync_with_stdio(false);
     cout << setprecision(9);
-    // Main loop
+
+    // Main game loop
     while (true) {
-        getKeyPress();
-        rayCast();
-        projectDistanceTo3D();
-        drawScreen();
+        getKeyPress(); // Check if keys pressed
+        rayCast(); // Cast rays
+        projectDistanceTo3D(); // Create 3d projection to screen buffer
+        drawScreen(); // Output screen
         drawPlayerOnMap(); // Show a minimap after the screen is drawn
-        cout << posx << " " << posy << " " << theta << endl;
+
+        cout << posx << " " << posy << " " << theta << endl; // Output position information to improve debugging
     }
 
     return 0;
